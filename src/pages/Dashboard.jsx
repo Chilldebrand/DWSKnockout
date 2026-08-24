@@ -196,13 +196,13 @@ function RulesCard() {
             transition={{ delay: i * 0.05 }}
             className="flex items-start gap-4 rounded-xl border border-white/10 bg-white/[0.04] p-5 transition-colors hover:border-turf-500/40"
           >
-            <span className="text-2xl leading-none">{r.icon}</span>
+            <span className="text-3xl leading-none">{r.icon}</span>
             <div>
-              <h3 className="text-base font-bold text-white">
+              <h3 className="text-lg font-bold text-white sm:text-xl">
                 <span className="mr-1.5 text-turf-400">{i + 1}.</span>
                 {r.title}
               </h3>
-              <p className="mt-1 text-sm leading-relaxed text-gray-300">{r.text}</p>
+              <p className="mt-1.5 text-base leading-relaxed text-gray-200">{r.text}</p>
             </div>
           </motion.li>
         ))}
