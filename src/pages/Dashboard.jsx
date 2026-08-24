@@ -26,10 +26,17 @@ export default function Dashboard() {
   const [games, setGames] = useState([])
   const [myPick, setMyPick] = useState(null)
   const [week, setWeek] = useState(null)
+  const [aliveCount, setAliveCount] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
+      const { count } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .is('eliminated_week', null)
+      setAliveCount(count ?? 0)
+
       const { data } = await supabase
         .from('games')
         .select('*')
@@ -126,7 +133,11 @@ export default function Dashboard() {
             }
             accent="text-white"
           />
-          <StatCard title="Games this week" value={String(games.length)} accent="text-white" />
+          <StatCard
+            title="Players still alive"
+            value={aliveCount != null ? String(aliveCount) : '—'}
+            accent="text-turf-400"
+          />
         </div>
       )}
 
