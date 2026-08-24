@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-field-950: #0a0f1e;
+  --color-field-900: #101830;
+  --color-field-800: #182448;
+  --color-turf-500: #22c55e;
+  --color-accent-500: #f59e0b;
+}
+
+body {
+  @apply bg-field-950 text-gray-100 antialiased;
+}
