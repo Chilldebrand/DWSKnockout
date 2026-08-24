@@ -14,6 +14,7 @@ export default function PickPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [savedTeam, setSavedTeam] = useState(null)
+  const [pendingPick, setPendingPick] = useState(null) // {teamId, gameId} awaiting confirm
 
   const teamMap = useMemo(
     () => Object.fromEntries(teams.map((t) => [t.id, t])),
@@ -94,10 +95,19 @@ export default function PickPage() {
         team: teamId,
         game_id: gameId,
         result: 'pending',
+        auto_assigned: false,
       },
     ])
     setSavedTeam(teamId)
     setTimeout(() => setSavedTeam(null), 2000)
+  }
+
+  function requestPick(teamId, gameId) {
+    if (myPickThisWeek && myPickThisWeek.team !== teamId) {
+      setPendingPick({ teamId, gameId })
+      return
+    }
+    makePick(teamId, gameId)
   }
 
   if (loading) return <p className="text-gray-400">Loading schedule…</p>
@@ -204,7 +214,7 @@ export default function PickPage() {
                         whileTap={reason ? {} : { scale: 0.96 }}
                         whileHover={reason ? {} : { y: -2 }}
                         disabled={!!reason}
-                        onClick={() => makePick(t.id, g.id)}
+                        onClick={() => requestPick(t.id, g.id)}
                         title={reason ?? undefined}
                         className={`group relative flex w-full flex-col items-center gap-1.5 rounded-xl border px-3 py-4 transition-all sm:px-5 ${
                           selected
@@ -263,6 +273,83 @@ export default function PickPage() {
             </motion.div>
           )
         })}
+      </AnimatePresence>
+      <AnimatePresence>
+        {pendingPick && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+            onClick={() => setPendingPick(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.85, y: 20 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass w-full max-w-sm rounded-2xl p-6 text-center"
+            >
+              <div className="text-4xl">🔄</div>
+              <h2 className="font-display mt-3 text-2xl font-extrabold uppercase">
+                Change your pick?
+              </h2>
+              <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+                <span className="flex flex-col items-center gap-1 opacity-60">
+                  {teamMap[myPickThisWeek.team]?.logo && (
+                    <img
+                      src={teamMap[myPickThisWeek.team].logo}
+                      alt=""
+                      className="h-10 w-10 object-contain grayscale"
+                    />
+                  )}
+                  <span className="font-semibold line-through">
+                    {teamMap[myPickThisWeek.team]?.name}
+                  </span>
+                </span>
+                <span className="text-lg text-turf-400">→</span>
+                <span className="flex flex-col items-center gap-1">
+                  {teamMap[pendingPick.teamId]?.logo && (
+                    <img
+                      src={teamMap[pendingPick.teamId].logo}
+                      alt=""
+                      className="helmet h-12 w-12 object-contain"
+                    />
+                  )}
+                  <span className="font-bold text-turf-400">
+                    {teamMap[pendingPick.teamId]?.name}
+                  </span>
+                </span>
+              </div>
+              <p className="mt-3 text-sm text-gray-400">
+                Are you sure you want to change your pick this week to{' '}
+                <span className="font-bold text-white">
+                  {teamMap[pendingPick.teamId]?.display ?? pendingPick.teamId}
+                </span>
+                ?
+              </p>
+              <div className="mt-5 flex gap-2">
+                <button
+                  onClick={() => setPendingPick(null)}
+                  className="flex-1 rounded-lg border border-white/15 py-2.5 font-semibold text-gray-300 transition-colors hover:border-white/30 hover:text-white"
+                >
+                  Keep current
+                </button>
+                <button
+                  onClick={() => {
+                    const { teamId, gameId } = pendingPick
+                    setPendingPick(null)
+                    makePick(teamId, gameId)
+                  }}
+                  className="flex-1 rounded-lg bg-gradient-to-r from-turf-500 to-turf-400 py-2.5 font-bold text-field-950 transition-transform hover:scale-[1.03] active:scale-[0.97]"
+                >
+                  Yes, change it
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   )
