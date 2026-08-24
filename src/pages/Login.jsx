@@ -43,12 +43,16 @@ export default function Login() {
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="rounded-2xl border border-white/10 bg-field-900 p-8 shadow-2xl"
+        className="glass rounded-2xl p-8 shadow-2xl"
       >
         <div className="mb-6 text-center">
           <div className="text-5xl">🏈</div>
-          <h1 className="mt-2 text-2xl font-black uppercase tracking-wide">
-            {mode === 'login' ? 'Welcome back' : 'Join the league'}
+          <h1 className="font-display mt-2 text-3xl font-extrabold uppercase tracking-wide">
+            {mode === 'login' ? (
+              <>Welcome <span className="text-gradient">back</span></>
+            ) : (
+              <>Join the <span className="text-gradient">league</span></>
+            )}
           </h1>
           <p className="mt-1 text-sm text-gray-400">
             {mode === 'login'
@@ -116,7 +120,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-lg bg-turf-500 py-3 font-bold text-field-950 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+            className="w-full rounded-lg bg-gradient-to-r from-turf-500 to-turf-400 py-3 font-bold text-field-950 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
           >
             {busy ? 'One moment…' : mode === 'login' ? 'Log In' : 'Create Account'}
           </button>

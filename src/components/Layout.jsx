@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext.jsx'
+import Logo from './Logo.jsx'
 
 const links = [
   { to: '/', label: 'Dashboard' },
@@ -15,38 +16,50 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-field-950/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <NavLink to="/" className="flex items-center gap-2">
-            <span className="text-2xl">🏈</span>
-            <span className="text-lg font-black tracking-wide uppercase">
-              DWS <span className="text-turf-500">Knockout</span>
+      <div className="app-backdrop" />
+
+      <header className="sticky top-0 z-20 border-b border-white/10 bg-field-950/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+          <NavLink to="/" className="flex items-center gap-2.5">
+            <Logo />
+            <span className="font-display text-2xl font-extrabold uppercase tracking-wide leading-none">
+              <span className="text-turf-500">DWS</span>{' '}
+              <span className="text-white">Knockout</span>
             </span>
           </NavLink>
-          <nav className="flex items-center gap-1 text-sm font-semibold">
+
+          <nav className="hidden sm:flex items-center gap-1 text-sm font-semibold">
             {links.map((l) => (
               <NavLink
                 key={l.to}
                 to={l.to}
                 end={l.to === '/'}
                 className={({ isActive }) =>
-                  `rounded-lg px-3 py-1.5 transition-colors ${
-                    isActive
-                      ? 'bg-white/10 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  `relative rounded-lg px-3 py-1.5 transition-colors ${
+                    isActive ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`
                 }
               >
-                {l.label}
+                {({ isActive }) => (
+                  <>
+                    {l.label}
+                    {isActive && (
+                      <motion.span
+                        layoutId="nav-underline"
+                        className="absolute inset-x-2 -bottom-[5px] h-0.5 rounded-full bg-gradient-to-r from-turf-500 to-brand-blue"
+                      />
+                    )}
+                  </>
+                )}
               </NavLink>
             ))}
             {profile?.is_admin && (
               <NavLink
                 to="/admin"
                 className={({ isActive }) =>
-                  `rounded-lg px-3 py-1.5 transition-colors ${
+                  `rounded-lg px-3 py-1.5 font-semibold transition-colors ${
                     isActive
-                      ? 'bg-accent-500/20 text-accent-500'
+                      ? 'bg-accent-500/20 text-accent-400'
                       : 'text-accent-500 hover:bg-accent-500/10'
                   }`
                 }
@@ -55,14 +68,15 @@ export default function Layout() {
               </NavLink>
             )}
           </nav>
+
           <div className="flex items-center gap-3 text-sm">
             {session ? (
               <>
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`font-semibold ${
-                    profile?.eliminated_week ? 'text-red-400' : 'text-turf-500'
+                  className={`hidden sm:inline font-semibold ${
+                    profile?.eliminated_week ? 'text-red-400' : 'text-turf-400'
                   }`}
                 >
                   {profile?.display_name ?? session.user.email}
@@ -80,7 +94,7 @@ export default function Layout() {
             ) : (
               <NavLink
                 to="/login"
-                className="rounded-lg bg-turf-500 px-4 py-1.5 font-bold text-field-950 transition-transform hover:scale-105"
+                className="rounded-lg bg-gradient-to-r from-turf-500 to-turf-400 px-4 py-1.5 font-bold text-field-950 transition-transform hover:scale-105"
               >
                 Log in
               </NavLink>
@@ -99,7 +113,9 @@ export default function Layout() {
       </motion.main>
 
       <footer className="border-t border-white/10 py-4 text-center text-xs text-gray-500">
-        DWS Knockout · One loss and you're out.
+        <span className="inline-flex items-center gap-1.5">
+          <Logo size={14} /> DWS Knockout · Dale Workforce Solutions · One loss and you're out.
+        </span>
       </footer>
     </div>
   )

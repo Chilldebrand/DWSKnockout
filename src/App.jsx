@@ -4,6 +4,7 @@ import Login from './pages/Login.jsx'
 import PickPage from './pages/PickPage.jsx'
 import Standings from './pages/Standings.jsx'
 import Dashboard from './pages/Dashboard.jsx'
+import AdminPage from './pages/AdminPage.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 
 function Placeholder({ title, note }) {
@@ -25,7 +26,7 @@ export default function App() {
           <Route path="/standings" element={<Standings />} />
           <Route path="/schedule" element={<Placeholder title="Schedule" note="Full season schedule by week." />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<Placeholder title="Admin" note="Results entry and league management." />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Route>
       </Routes>
     </AuthProvider>

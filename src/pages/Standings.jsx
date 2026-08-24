@@ -60,7 +60,9 @@ export default function Standings() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-3xl font-black uppercase tracking-wide">Standings</h1>
+        <h1 className="font-display text-4xl font-extrabold uppercase tracking-wide">
+          Stan<span className="text-gradient">dings</span>
+        </h1>
         <motion.span
           key={aliveCount}
           initial={{ scale: 1.3 }}
@@ -71,7 +73,7 @@ export default function Standings() {
         </motion.span>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-white/10">
+      <div className="glass overflow-hidden rounded-2xl">
         <table className="w-full text-left text-sm">
           <thead className="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
             <tr>

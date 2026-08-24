@@ -1,13 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-field-950: #0a0f1e;
-  --color-field-900: #101830;
-  --color-field-800: #182448;
-  --color-turf-500: #22c55e;
-  --color-accent-500: #f59e0b;
+  /* DWS brand palette (from Dale Workforce Solutions logo) */
+  --color-field-950: #0e1526;
+  --color-field-900: #16203a;
+  --color-field-800: #1f2c4d;
+  --color-field-700: #2a3a63;
+
+  --color-turf-400: #5fcc79;
+  --color-turf-500: #2fae52; /* DWS green */
+  --color-turf-600: #268c43;
+
+  --color-accent-400: #ffb14e;
+  --color-accent-500: #f7941d; /* DWS orange */
+
+  --color-brand-blue: #29a8e0;
+  --color-brand-magenta: #c63663;
+  --color-brand-purple: #7d4198;
+
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-sans: 'Inter', sans-serif;
 }
 
 body {
-  @apply bg-field-950 text-gray-100 antialiased;
+  @apply text-gray-100 antialiased;
+  font-family: var(--font-sans);
+  background-color: var(--color-field-950);
+}
+
+/* Layered brand-glow backdrop over navy */
+.app-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 75% 50% at 12% -8%, rgba(47, 174, 82, 0.17), transparent 60%),
+    radial-gradient(ellipse 65% 45% at 88% -5%, rgba(41, 168, 224, 0.14), transparent 60%),
+    radial-gradient(ellipse 80% 55% at 50% 115%, rgba(247, 148, 29, 0.10), transparent 65%),
+    radial-gradient(ellipse 50% 40% at 95% 85%, rgba(125, 65, 152, 0.12), transparent 65%),
+    var(--color-field-950);
+}
+
+/* Faint geometric triangle mosaic (DWS motif) */
+.app-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280' viewBox='0 0 280 280'%3E%3Cpolygon points='0,0 140,0 0,140' fill='%23ffffff'/%3E%3Cpolygon points='140,140 280,140 280,280' fill='%23ffffff'/%3E%3Cpolygon points='140,0 280,0 280,140' fill='%23ffffff'/%3E%3Cpolygon points='0,140 140,140 0,280' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-size: 280px 280px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0.25) 60%, transparent);
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+.glass {
+  background: linear-gradient(160deg, rgba(42, 58, 99, 0.5), rgba(14, 21, 38, 0.78));
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.glow-green { box-shadow: 0 0 30px rgba(47, 174, 82, 0.4); }
+
+.text-gradient {
+  background: linear-gradient(92deg, var(--color-turf-400), var(--color-brand-blue) 55%, var(--color-brand-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.helmet {
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
+  transition: transform 0.2s ease;
+}
+.group:hover .helmet, button:hover .helmet {
+  transform: scale(1.08) translateY(-2px);
 }

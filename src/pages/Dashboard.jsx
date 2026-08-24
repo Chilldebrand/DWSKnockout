@@ -68,18 +68,18 @@ export default function Dashboard() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl border border-white/10 bg-field-900 p-10 text-center"
+        className="glass rounded-2xl p-10 text-center"
       >
         <div className="text-6xl">🏈</div>
-        <h1 className="mt-4 text-3xl font-black uppercase">
-          DWS <span className="text-turf-500">Knockout</span>
+        <h1 className="font-display mt-4 text-4xl font-extrabold uppercase">
+          DWS <span className="text-gradient">Knockout</span>
         </h1>
         <p className="mx-auto mt-2 max-w-md text-gray-400">
           Pick one NFL team to win each week. Win and you survive. Lose — or forget to
           pick — and you're knocked out. Last one standing takes the crown.
         </p>
         <Link to="/login">
-          <button className="mt-6 rounded-xl bg-turf-500 px-8 py-3 font-bold text-field-950 transition-transform hover:scale-105 active:scale-95">
+          <button className="mt-6 rounded-xl bg-gradient-to-r from-turf-500 to-turf-400 px-8 py-3 font-bold text-field-950 shadow-lg glow-green transition-transform hover:scale-105 active:scale-95">
             Join the League
           </button>
         </Link>
@@ -90,8 +90,8 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-black uppercase tracking-wide">
-        Welcome back, {profile?.display_name}
+      <h1 className="font-display text-4xl font-extrabold uppercase tracking-wide">
+        Welcome back, <span className="text-gradient">{profile?.display_name}</span>
       </h1>
 
       {profile?.eliminated_week ? (
