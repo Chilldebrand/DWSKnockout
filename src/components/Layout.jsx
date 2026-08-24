@@ -1,5 +1,6 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const links = [
   { to: '/', label: 'Dashboard' },
@@ -9,6 +10,9 @@ const links = [
 ]
 
 export default function Layout() {
+  const { session, profile, signOut } = useAuth()
+  const navigate = useNavigate()
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-20 border-b border-white/10 bg-field-950/80 backdrop-blur">
@@ -36,7 +40,52 @@ export default function Layout() {
                 {l.label}
               </NavLink>
             ))}
+            {profile?.is_admin && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-1.5 transition-colors ${
+                    isActive
+                      ? 'bg-accent-500/20 text-accent-500'
+                      : 'text-accent-500 hover:bg-accent-500/10'
+                  }`
+                }
+              >
+                Admin
+              </NavLink>
+            )}
           </nav>
+          <div className="flex items-center gap-3 text-sm">
+            {session ? (
+              <>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className={`font-semibold ${
+                    profile?.eliminated_week ? 'text-red-400' : 'text-turf-500'
+                  }`}
+                >
+                  {profile?.display_name ?? session.user.email}
+                </motion.span>
+                <button
+                  onClick={async () => {
+                    await signOut()
+                    navigate('/login')
+                  }}
+                  className="rounded-lg border border-white/15 px-3 py-1.5 text-gray-300 transition-colors hover:border-white/30 hover:text-white"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <NavLink
+                to="/login"
+                className="rounded-lg bg-turf-500 px-4 py-1.5 font-bold text-field-950 transition-transform hover:scale-105"
+              >
+                Log in
+              </NavLink>
+            )}
+          </div>
         </div>
       </header>
 

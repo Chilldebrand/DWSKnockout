@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
+import Login from './pages/Login.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 
 function Placeholder({ title, note }) {
   return (
@@ -12,15 +14,17 @@ function Placeholder({ title, note }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<Placeholder title="Dashboard" note="Week overview, your pick status, countdown to kickoff." />} />
-        <Route path="/pick" element={<Placeholder title="Make a Pick" note="Weekly schedule with records, spreads and team selection." />} />
-        <Route path="/standings" element={<Placeholder title="Standings" note="Pick records, streaks, alive/eliminated status." />} />
-        <Route path="/schedule" element={<Placeholder title="Schedule" note="Full season schedule by week." />} />
-        <Route path="/login" element={<Placeholder title="Login / Register" note="Account access." />} />
-        <Route path="/admin" element={<Placeholder title="Admin" note="Results entry and league management." />} />
-      </Route>
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<Placeholder title="Dashboard" note="Week overview, your pick status, countdown to kickoff." />} />
+          <Route path="/pick" element={<Placeholder title="Make a Pick" note="Weekly schedule with records, spreads and team selection." />} />
+          <Route path="/standings" element={<Placeholder title="Standings" note="Pick records, streaks, alive/eliminated status." />} />
+          <Route path="/schedule" element={<Placeholder title="Schedule" note="Full season schedule by week." />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<Placeholder title="Admin" note="Results entry and league management." />} />
+        </Route>
+      </Routes>
+    </AuthProvider>
   )
 }
