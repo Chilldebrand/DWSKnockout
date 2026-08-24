@@ -186,21 +186,26 @@ function RulesCard() {
       <h2 className="font-display text-2xl font-extrabold uppercase tracking-wide">
         League <span className="text-gradient">Rules</span>
       </h2>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ol className="mt-4 space-y-2">
         {RULES.map((r, i) => (
-          <motion.div
+          <motion.li
             key={r.title}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.06 }}
-            className="rounded-xl border border-white/8 bg-white/[0.03] p-4 transition-colors hover:border-turf-500/40"
+            initial={{ opacity: 0, x: -12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.05 }}
+            className="flex items-start gap-3 rounded-xl border border-white/8 bg-white/[0.03] p-4 transition-colors hover:border-turf-500/40"
           >
-            <div className="text-xl">{r.icon}</div>
-            <h3 className="mt-1.5 text-sm font-bold text-turf-400">{r.title}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-gray-400">{r.text}</p>
-          </motion.div>
+            <span className="mt-0.5 text-xl">{r.icon}</span>
+            <div>
+              <h3 className="text-sm font-bold text-turf-400">
+                {i + 1}. {r.title}
+              </h3>
+              <p className="mt-0.5 text-xs leading-relaxed text-gray-400">{r.text}</p>
+            </div>
+          </motion.li>
         ))}
-      </div>
+      </ol>
     </motion.section>
   )
 }

@@ -51,6 +51,31 @@ export default function AdminPage() {
     if (!error) refresh()
   }
 
+  async function resetPassword(p) {
+    const pw = window.prompt(
+      `Temporary password for ${p.display_name} (min 6 chars).\nShare it with them privately — they should change it after logging in.`,
+    )
+    if (!pw) return
+    const { error } = await supabase.rpc('admin_reset_password', {
+      target_user_id: p.id,
+      temp_password: pw,
+    })
+    setNotice(error ? `⚠ ${error.message}` : `✓ ${p.display_name}'s password reset — they are logged out everywhere`)
+    setTimeout(() => setNotice(''), 4000)
+  }
+
+  async function changeEmail(p) {
+    const email = window.prompt(`New email for ${p.display_name} (currently ${p.email ?? 'none'}):`)
+    if (!email) return
+    const { error } = await supabase.rpc('admin_change_email', {
+      target_user_id: p.id,
+      new_email: email,
+    })
+    setNotice(error ? `⚠ ${error.message}` : `✓ ${p.display_name}'s email changed to ${email.toLowerCase()}`)
+    setTimeout(() => setNotice(''), 4000)
+    if (!error) refresh()
+  }
+
   if (!me)
     return (
       <div className="glass rounded-2xl p-8 text-center text-gray-400">
@@ -113,9 +138,10 @@ export default function AdminPage() {
             <thead className="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
               <tr>
                 <th className="px-4 py-3">Player</th>
+                <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Eliminated (week)</th>
                 <th className="px-4 py-3">Admin</th>
-                <th className="px-4 py-3">Picks</th>
+                <th className="px-4 py-3">Account</th>
               </tr>
             </thead>
             <tbody>
@@ -125,11 +151,12 @@ export default function AdminPage() {
                     {p.display_name}
                     {p.id === me.id && <span className="ml-2 text-xs text-turf-400">(you)</span>}
                   </td>
+                  <td className="px-4 py-3 text-xs text-gray-400">{p.email ?? '—'}</td>
                   <td className="px-4 py-3">
                     <input
                       type="number"
                       min="1"
-                      max="18"
+                      max="22"
                       placeholder="alive"
                       value={p.eliminated_week ?? ''}
                       onChange={(e) =>
@@ -163,8 +190,23 @@ export default function AdminPage() {
                       {p.is_admin ? '★ Admin' : '☆ Player'}
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-gray-400">
-                    {picks.filter((k) => k.user_id === p.id).length}
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => resetPassword(p)}
+                        title="Reset to a temporary password"
+                        className="rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-300 transition-colors hover:bg-turf-500/20 hover:text-turf-400"
+                      >
+                        🔑 Reset pw
+                      </button>
+                      <button
+                        onClick={() => changeEmail(p)}
+                        title="Change their email"
+                        className="rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-300 transition-colors hover:bg-brand-blue/20 hover:text-brand-blue"
+                      >
+                        ✉️ Email
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
