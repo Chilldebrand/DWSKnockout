@@ -13,14 +13,31 @@ const SEASON = 2026
 const TOTAL_WEEKS = 18
 // League rule: player who fails to submit a pick loses when all Week N games finish
 const MISSED_PICK_IS_LOSS = true
+const DRY_RUN = process.env.DRY_RUN === '1'
 
 const ESPN_BASE =
   'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'
 
-async function fetchWeek(week) {
-  const url = `${ESPN_BASE}?dates=${SEASON}&weeks=${week}`
+// ESPN ignores week/seasontype params on this endpoint, so we scan
+// 7-day date windows and filter events by their own season/week metadata.
+const WINDOW_START = '20260901'
+const WINDOW_END = '20270120'
+
+function* dateWindows(from, to, days = 7) {
+  let cur = new Date(`${from.slice(0, 4)}-${from.slice(4, 6)}-${from.slice(6, 8)}T00:00Z`)
+  const end = new Date(`${to.slice(0, 4)}-${to.slice(4, 6)}-${to.slice(6, 8)}T00:00Z`)
+  while (cur < end) {
+    const next = new Date(Math.min(cur.getTime() + days * 86400000, end.getTime()))
+    const fmt = (d) => d.toISOString().slice(0, 10).replaceAll('-', '')
+    yield [fmt(cur), fmt(next)]
+    cur = next
+  }
+}
+
+async function fetchWindow(from, to) {
+  const url = `${ESPN_BASE}?dates=${from}-${to}`
   const res = await fetch(url)
-  if (!res.ok) throw new Error(`ESPN ${res.status} for week ${week}`)
+  if (!res.ok) throw new Error(`ESPN ${res.status} for ${from}-${to}`)
   return res.json()
 }
 
@@ -92,24 +109,37 @@ function parseGame(event, week) {
 async function main() {
   console.log(`Syncing ${SEASON} season…`)
 
-  const teamUpdates = new Map() // abbr -> {w,l,t}
-  const games = []
+  const teamUpdates = new Map() // abbr -> {w,l,t,logo}
+  const eventsById = new Map() // dedupe across overlapping windows
 
-  for (let week = 1; week <= TOTAL_WEEKS; week++) {
+  for (const [from, to] of dateWindows(WINDOW_START, WINDOW_END)) {
     try {
-      const data = await fetchWeek(week)
-
+      const data = await fetchWindow(from, to)
+      let kept = 0
       for (const ev of data.events ?? []) {
-        Object.entries(parseRecords(ev)).forEach(([abbr, rec]) =>
-          teamUpdates.set(abbr, rec),
-        )
-        const g = parseGame(ev, week)
-        if (g) games.push(g)
+        const s = ev.season ?? {}
+        // Regular season of our year only — skips preseason & playoffs
+        if (s.year !== SEASON || s.type !== 2) continue
+        const weekNum = ev.week?.number
+        if (!weekNum || weekNum < 1 || weekNum > TOTAL_WEEKS) continue
+        if (eventsById.has(ev.id)) continue
+
+        eventsById.set(ev.id, { ev, week: weekNum })
+        for (const [abbr, rec] of Object.entries(parseRecords(ev))) {
+          teamUpdates.set(abbr, rec)
+        }
+        kept++
       }
-      console.log(`Week ${week}: ${data.events?.length ?? 0} games`)
+      console.log(`Window ${from}-${to}: ${data.events?.length ?? 0} raw, ${kept} regular-season kept`)
     } catch (err) {
-      console.error(`Week ${week} failed: ${err.message}`)
+      console.error(`Window ${from}-${to} failed: ${err.message}`)
     }
+  }
+
+  const games = []
+  for (const { ev, week } of eventsById.values()) {
+    const g = parseGame(ev, week)
+    if (g) games.push(g)
   }
 
   if (!games.length) {
@@ -118,6 +148,17 @@ async function main() {
   }
 
   // Upsert games (odds refresh happens here every run = daily spread updates)
+  if (DRY_RUN) {
+    const byWeek = {}
+    for (const g of games) (byWeek[g.week] ??= []).push(g)
+    for (const w of Object.keys(byWeek))
+      console.log(
+        `Week ${w}: ${byWeek[w].length} games, e.g. ${byWeek[w][0].away_team}@${byWeek[w][0].home_team} fav=${byWeek[w][0].favorite} spread=${byWeek[w][0].spread}`,
+      )
+    console.log(`DRY RUN — would upsert ${games.length} games and ${teamUpdates.size} team records`)
+    return
+  }
+
   const { error: gErr } = await supabase.from('games').upsert(games, {
     onConflict: 'id',
   })
