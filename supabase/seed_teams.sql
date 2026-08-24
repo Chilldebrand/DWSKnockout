@@ -32,7 +32,7 @@ insert into public.teams (id, name, display, color, alt_color) values
   ('SEA', 'Seahawks',    'Seattle Seahawks',     '#002244', '#69BE28'),
   ('TB',  'Buccaneers',  'Tampa Bay Buccaneers', '#D50A0A', '#34302B'),
   ('TEN', 'Titans',      'Tennessee Titans',     '#0C2340', '#4B92DB'),
-  ('WAS', 'Commanders',  'Washington Commanders','#5A1414', '#FFB612')
+  ('WSH', 'Commanders',  'Washington Commanders','#5A1414', '#FFB612')
 on conflict (id) do update set
   name = excluded.name,
   display = excluded.display,
