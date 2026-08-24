@@ -154,6 +154,11 @@ const RULES = [
     text: 'Every game locks individually when it starts. You can still pick a Sunday afternoon team even after the early games have kicked off.',
   },
   {
+    icon: '💀',
+    title: 'If your pick loses, you\'re out. Better luck next year!',
+    text: 'One loss and your season is over — you\'ll keep seeing the standings, but the crown is out of reach.',
+  },
+  {
     icon: '🎲',
     title: 'Forget to pick? You get a random team',
     text: 'The site assigns you a random team you haven\'t used from a game that hasn\'t started. You can still swap it yourself before kickoff.',
@@ -167,11 +172,6 @@ const RULES = [
     icon: '🏆',
     title: 'Playoff extension',
     text: 'If multiple players survive the full regular season, we continue into the NFL playoffs until one person remains.',
-  },
-  {
-    icon: '1️⃣',
-    title: 'One entry per person',
-    text: 'Single entry, no buybacks. When you\'re out, you\'re out — see everyone at next year\'s draft.',
   },
 ]
 
