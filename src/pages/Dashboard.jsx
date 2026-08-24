@@ -149,14 +149,14 @@ const RULES = [
     text: 'Win and you survive to next week. Each NFL team is a one-time pick for you all season, so spend your best teams carefully.',
   },
   {
-    icon: '⏰',
-    title: 'Picks lock at that game\'s kickoff',
-    text: 'Every game locks individually when it starts. You can still pick a Sunday afternoon team even after the early games have kicked off.',
-  },
-  {
     icon: '💀',
     title: 'If your pick loses, you\'re out. Better luck next year!',
     text: 'One loss and your season is over — you\'ll keep seeing the standings, but the crown is out of reach.',
+  },
+  {
+    icon: '⏰',
+    title: 'Picks lock at that game\'s kickoff',
+    text: 'Every game locks individually when it starts. You can still pick a Sunday afternoon team even after the early games have kicked off.',
   },
   {
     icon: '🎲',
