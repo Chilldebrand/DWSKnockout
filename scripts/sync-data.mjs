@@ -41,6 +41,11 @@ async function fetchWindow(from, to) {
   return res.json()
 }
 
+function normColor(c) {
+  if (!c || typeof c !== 'string') return undefined
+  return c.startsWith('#') ? c : `#${c}`
+}
+
 function parseRecords(event) {
   const comp = event.competitions[0]
   const out = {}
@@ -52,6 +57,12 @@ function parseRecords(event) {
       l: m ? +m[2] : 0,
       t: m ? +(m[3] ?? 0) : 0,
       logo: c.team.logo ?? null,
+      // Full row needed: Postgres validates NOT NULL columns even on
+      // the update path of an upsert
+      name: c.team.name ?? c.team.abbreviation,
+      display: c.team.displayName ?? c.team.abbreviation,
+      color: normColor(c.team.color),
+      alt_color: normColor(c.team.alternateColor),
     }
   }
   return out
@@ -169,10 +180,14 @@ async function main() {
   if (teamUpdates.size) {
     const rows = [...teamUpdates.entries()].map(([id, r]) => ({
       id,
+      name: r.name,
+      display: r.display,
+      color: r.color ?? '#333333',
+      alt_color: r.alt_color ?? '#999999',
+      logo: r.logo,
       wins: r.w,
       losses: r.l,
       ties: r.t,
-      ...(r.logo ? { logo: r.logo } : {}),
     }))
     const { error } = await supabase.from('teams').upsert(rows, { onConflict: 'id' })
     if (error) throw error
