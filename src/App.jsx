@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import Login from './pages/Login.jsx'
+import PickPage from './pages/PickPage.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 
 function Placeholder({ title, note }) {
@@ -18,7 +19,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Placeholder title="Dashboard" note="Week overview, your pick status, countdown to kickoff." />} />
-          <Route path="/pick" element={<Placeholder title="Make a Pick" note="Weekly schedule with records, spreads and team selection." />} />
+          <Route path="/pick" element={<PickPage />} />
           <Route path="/standings" element={<Placeholder title="Standings" note="Pick records, streaks, alive/eliminated status." />} />
           <Route path="/schedule" element={<Placeholder title="Schedule" note="Full season schedule by week." />} />
           <Route path="/login" element={<Login />} />

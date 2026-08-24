@@ -76,6 +76,14 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- ============ POSTGREST GRANTS (required for projects created after May 2026) ============
+
+grant usage on schema public to anon, authenticated;
+grant select on public.teams, public.games to anon, authenticated;
+grant select on public.profiles, public.picks to authenticated;
+grant insert, update on public.picks to authenticated;
+grant update on public.profiles to authenticated;
+
 -- ============ ROW LEVEL SECURITY ============
 
 alter table public.teams    enable row level security;
@@ -100,20 +108,8 @@ create policy "update own pick"      on public.picks for update to authenticated
   using (auth.uid() = user_id);
 
 -- ============ PICK LOCK RULE (DB-level enforcement) ============
--- A pick can only be inserted/changed while its game has not kicked off.
-
-create or replace function public.game_not_started()
-returns boolean
-language sql stable security definer set search_path = public
-as $$
-  select exists (
-    select 1 from public.games g
-    where g.id = (select p.game_id from public.picks p where p.ctid = current_ctid)
-      and g.kickoff > now()
-  );
-$$;
-
--- Simpler approach used instead of ctid trick: validate in a dedicated function below.
+-- Picks are inserted/changed exclusively through make_pick() below,
+-- which rejects picks after kickoff and blocks reused teams.
 
 create or replace function public.make_pick(
   p_season int,

@@ -30,9 +30,12 @@ function parseRecords(event) {
   for (const c of comp.competitors) {
     const rec = (c.records ?? []).find((r) => r.type === 'total')?.summary ?? ''
     const m = rec.match(/^(\d+)-(\d+)(?:-(\d+))?/)
-    out[c.team.abbreviation] = m
-      ? { w: +m[1], l: +m[2], t: +(m[3] ?? 0) }
-      : { w: 0, l: 0, t: 0 }
+    out[c.team.abbreviation] = {
+      w: m ? +m[1] : 0,
+      l: m ? +m[2] : 0,
+      t: m ? +(m[3] ?? 0) : 0,
+      logo: c.team.logo ?? null,
+    }
   }
   return out
 }
@@ -128,6 +131,7 @@ async function main() {
       wins: r.w,
       losses: r.l,
       ties: r.t,
+      ...(r.logo ? { logo: r.logo } : {}),
     }))
     const { error } = await supabase.from('teams').upsert(rows, { onConflict: 'id' })
     if (error) throw error
