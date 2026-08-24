@@ -144,24 +144,24 @@ export default function Dashboard() {
 
 const RULES = [
   {
+    icon: '🏈',
+    title: 'Pick ONE team each week to win — and you can NEVER pick that team again',
+    text: 'Win and you survive to next week. Each NFL team is a one-time pick for you all season, so spend your best teams carefully.',
+  },
+  {
     icon: '⏰',
-    title: 'Picks lock at kickoff',
-    text: 'Each game locks individually when it starts. Pick a Sunday afternoon team even after the early games have kicked off.',
+    title: 'Picks lock at that game\'s kickoff',
+    text: 'Every game locks individually when it starts. You can still pick a Sunday afternoon team even after the early games have kicked off.',
   },
   {
     icon: '🎲',
-    title: 'Forget = random pick',
-    text: 'Miss the deadline? The site assigns you a random team you haven\'t used from a game that hasn\'t started. You can still swap it yourself before kickoff.',
+    title: 'Forget to pick? You get a random team',
+    text: 'The site assigns you a random team you haven\'t used from a game that hasn\'t started. You can still swap it yourself before kickoff.',
   },
   {
     icon: '🤝',
-    title: 'Ties are your friend',
+    title: 'Tie games don\'t hurt you',
     text: 'If your game ends in a tie, you survive. No harm done.',
-  },
-  {
-    icon: '🚫',
-    title: 'No team reuse',
-    text: 'Each NFL team can only be picked once by you — all season. Choose wisely.',
   },
   {
     icon: '🏆',
@@ -186,7 +186,7 @@ function RulesCard() {
       <h2 className="font-display text-2xl font-extrabold uppercase tracking-wide">
         League <span className="text-gradient">Rules</span>
       </h2>
-      <ol className="mt-4 space-y-2">
+      <ol className="mt-4 space-y-3">
         {RULES.map((r, i) => (
           <motion.li
             key={r.title}
@@ -194,14 +194,15 @@ function RulesCard() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.05 }}
-            className="flex items-start gap-3 rounded-xl border border-white/8 bg-white/[0.03] p-4 transition-colors hover:border-turf-500/40"
+            className="flex items-start gap-4 rounded-xl border border-white/10 bg-white/[0.04] p-5 transition-colors hover:border-turf-500/40"
           >
-            <span className="mt-0.5 text-xl">{r.icon}</span>
+            <span className="text-2xl leading-none">{r.icon}</span>
             <div>
-              <h3 className="text-sm font-bold text-turf-400">
-                {i + 1}. {r.title}
+              <h3 className="text-base font-bold text-white">
+                <span className="mr-1.5 text-turf-400">{i + 1}.</span>
+                {r.title}
               </h3>
-              <p className="mt-0.5 text-xs leading-relaxed text-gray-400">{r.text}</p>
+              <p className="mt-1 text-sm leading-relaxed text-gray-300">{r.text}</p>
             </div>
           </motion.li>
         ))}
