@@ -78,11 +78,13 @@ create trigger on_auth_user_created
 
 -- ============ POSTGREST GRANTS (required for projects created after May 2026) ============
 
-grant usage on schema public to anon, authenticated;
+grant usage on schema public to anon, authenticated, service_role;
 grant select on public.teams, public.games to anon, authenticated;
 grant select on public.profiles, public.picks to authenticated;
 grant insert, update on public.picks to authenticated;
 grant update on public.profiles to authenticated;
+-- Server-side sync job (service_role) needs full table access
+grant all on all tables in schema public to service_role;
 
 -- ============ ROW LEVEL SECURITY ============
 
