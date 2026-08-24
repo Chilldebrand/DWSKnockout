@@ -92,18 +92,25 @@ alter table public.picks    enable row level security;
 alter table public.profiles enable row level security;
 
 -- Public league data readable by anyone (site is viewable pre-login)
+drop policy if exists "public read teams" on public.teams;
 create policy "public read teams"    on public.teams    for select using (true);
+drop policy if exists "public read games" on public.games;
 create policy "public read games"    on public.games    for select using (true);
 
 -- Profiles visible to logged-in users
+drop policy if exists "auth read profiles" on public.profiles;
 create policy "auth read profiles"   on public.profiles for select to authenticated using (true);
+drop policy if exists "update own profile" on public.profiles;
 create policy "update own profile"   on public.profiles for update to authenticated using (auth.uid() = id);
 
 -- Picks: everyone logged-in sees all picks (standings need it),
 -- but you may only create/change your own
+drop policy if exists "auth read picks" on public.picks;
 create policy "auth read picks"      on public.picks for select to authenticated using (true);
+drop policy if exists "insert own pick" on public.picks;
 create policy "insert own pick"      on public.picks for insert to authenticated
   with check (auth.uid() = user_id);
+drop policy if exists "update own pick" on public.picks;
 create policy "update own pick"      on public.picks for update to authenticated
   using (auth.uid() = user_id);
 
