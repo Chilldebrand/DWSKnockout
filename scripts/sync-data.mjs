@@ -10,9 +10,11 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
 const SEASON = 2026
-const TOTAL_WEEKS = 18
-// League rule: player who fails to submit a pick loses when all Week N games finish
-const MISSED_PICK_IS_LOSS = true
+const REG_SEASON_WEEKS = 18
+const PLAYOFF_WEEKS = [19, 20, 21, 22] // Wild Card, Divisional, Conf Championships, Super Bowl
+// League rule: missed pick = random unused team from a game kicking off within
+// ASSIGNMENT_WINDOW hours; eliminated only if the whole week passes with no pick
+const ASSIGNMENT_WINDOW_HOURS = 24
 const DRY_RUN = process.env.DRY_RUN === '1'
 
 const ESPN_BASE =
@@ -20,8 +22,9 @@ const ESPN_BASE =
 
 // ESPN ignores week/seasontype params on this endpoint, so we scan
 // 7-day date windows and filter events by their own season/week metadata.
+// Extends through the Super Bowl to support playoff extension rounds.
 const WINDOW_START = '20260901'
-const WINDOW_END = '20270120'
+const WINDOW_END = '20270215'
 
 function* dateWindows(from, to, days = 7) {
   let cur = new Date(`${from.slice(0, 4)}-${from.slice(4, 6)}-${from.slice(6, 8)}T00:00Z`)
@@ -129,10 +132,11 @@ async function main() {
       let kept = 0
       for (const ev of data.events ?? []) {
         const s = ev.season ?? {}
-        // Regular season of our year only — skips preseason & playoffs
-        if (s.year !== SEASON || s.type !== 2) continue
+        // Regular season (type 2, weeks 1-18) and playoffs (type 3, weeks 19+)
+        const isRegular = s.year === SEASON && s.type === 2 && ev.week?.number >= 1 && ev.week?.number <= REG_SEASON_WEEKS
+        const isPlayoff = s.year === SEASON && s.type === 3 && PLAYOFF_WEEKS.includes(ev.week?.number)
+        if (!isRegular && !isPlayoff) continue
         const weekNum = ev.week?.number
-        if (!weekNum || weekNum < 1 || weekNum > TOTAL_WEEKS) continue
         if (eventsById.has(ev.id)) continue
 
         eventsById.set(ev.id, { ev, week: weekNum })
@@ -194,8 +198,8 @@ async function main() {
     console.log(`Updated records for ${rows.length} teams`)
   }
 
-  // Grade picks for final games
-  const finals = games.filter((g) => g.status === 'final' && g.winner && g.winner !== 'TIE')
+  // Grade picks for final games (league rule: tie = survive)
+  const finals = games.filter((g) => g.status === 'final' && g.winner)
   let graded = 0
   for (const g of finals) {
     const { data: picks, error: pErr } = await supabase
@@ -205,7 +209,7 @@ async function main() {
     if (pErr) throw pErr
 
     for (const p of picks ?? []) {
-      const result = p.team === g.winner ? 'win' : 'loss'
+      const result = g.winner === 'TIE' || p.team === g.winner ? 'win' : 'loss'
       if (p.result !== result) {
         const { error } = await supabase
           .from('picks')
@@ -225,12 +229,26 @@ async function main() {
   }
   console.log(`Graded ${graded} picks`)
 
-  // Missed-pick enforcement: once every game of a week is final,
-  // anyone without a pick that week takes the loss
-  if (MISSED_PICK_IS_LOSS) {
-    for (let week = 1; week <= TOTAL_WEEKS; week++) {
+  // Missed-pick handling (league rule): assign a random unused team from a game
+  // kicking off within the assignment window. Eliminated only if the entire week
+  // passes with no pick and no assignable options.
+  {
+    const now = Date.now()
+    const windowEnd = now + ASSIGNMENT_WINDOW_HOURS * 3600000
+    const { data: allSeasonPicks } = await supabase
+      .from('picks')
+      .select('user_id, team, week')
+      .eq('season', SEASON)
+    const usedTeamsByUser = new Map()
+    for (const p of allSeasonPicks ?? []) {
+      if (!usedTeamsByUser.has(p.user_id)) usedTeamsByUser.set(p.user_id, new Set())
+      usedTeamsByUser.get(p.user_id).add(p.team)
+    }
+
+    const maxWeek = Math.max(...games.map((g) => g.week))
+    for (let week = 1; week <= maxWeek; week++) {
       const weekGames = games.filter((g) => g.week === week)
-      if (!weekGames.length || !weekGames.every((g) => g.status === 'final')) continue
+      if (!weekGames.length) continue
 
       const { data: aliveProfiles } = await supabase
         .from('profiles')
@@ -238,22 +256,51 @@ async function main() {
         .is('eliminated_week', null)
       const { data: weekPicks } = await supabase
         .from('picks')
-        .select('user_id, result')
+        .select('user_id')
         .eq('season', SEASON)
         .eq('week', week)
+      const pickers = new Set((weekPicks ?? []).map((p) => p.user_id))
 
-      const pickers = new Map((weekPicks ?? []).map((p) => [p.user_id, p]))
-      const losers = (aliveProfiles ?? []).filter(
-        (pr) => !pickers.has(pr.id) || pickers.get(pr.id).result !== 'win',
-      )
-      // Only eliminate non-pickers here; pickers already handled above
-      for (const pr of losers.filter((l) => !pickers.has(l.id))) {
-        await supabase
-          .from('profiles')
-          .update({ eliminated_week: week })
-          .eq('id', pr.id)
-          .is('eliminated_week', null)
-        console.log(`${pr.display_name}: no pick week ${week} — ELIMINATED`)
+      for (const pr of aliveProfiles ?? []) {
+        if (pickers.has(pr.id)) continue
+
+        const eligibleGames = weekGames.filter((g) => {
+          const k = new Date(g.kickoff).getTime()
+          return k > now && k <= windowEnd
+        })
+        const used = usedTeamsByUser.get(pr.id) ?? new Set()
+        const candidates = []
+        for (const g of eligibleGames) {
+          for (const t of [g.home_team, g.away_team]) {
+            if (!used.has(t)) candidates.push({ team: t, game: g })
+          }
+        }
+
+        if (candidates.length) {
+          const choice = candidates[Math.floor(Math.random() * candidates.length)]
+          const { error } = await supabase
+            .from('picks')
+            .upsert(
+              {
+                user_id: pr.id,
+                season: SEASON,
+                week,
+                team: choice.team,
+                game_id: choice.game.id,
+                auto_assigned: true,
+              },
+              { onConflict: 'user_id,season,week' },
+            )
+          if (error) console.error(`assign ${pr.display_name}: ${error.message}`)
+          else console.log(`${pr.display_name}: auto-assigned ${choice.team} (week ${week})`)
+        } else if (weekGames.every((g) => g.status === 'final')) {
+          await supabase
+            .from('profiles')
+            .update({ eliminated_week: week })
+            .eq('id', pr.id)
+            .is('eliminated_week', null)
+          console.log(`${pr.display_name}: no pick and no options week ${week} — ELIMINATED`)
+        }
       }
     }
   }

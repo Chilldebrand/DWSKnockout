@@ -122,9 +122,15 @@ export default function PickPage() {
           <motion.span
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="rounded-full bg-turf-500/15 px-4 py-1.5 text-sm font-bold text-turf-400 ring-1 ring-turf-500/40"
+            className={`rounded-full px-4 py-1.5 text-sm font-bold ring-1 ${
+              myPickThisWeek.auto_assigned
+                ? 'bg-accent-500/15 text-accent-400 ring-accent-500/40'
+                : 'bg-turf-500/15 text-turf-400 ring-turf-500/40'
+            }`}
           >
-            ✓ {teamMap[myPickThisWeek.team]?.display ?? myPickThisWeek.team}
+            {myPickThisWeek.auto_assigned
+              ? `🎲 Random: ${teamMap[myPickThisWeek.team]?.name ?? myPickThisWeek.team} — tap any team to swap`
+              : `✓ ${teamMap[myPickThisWeek.team]?.display ?? myPickThisWeek.team}`}
           </motion.span>
         ) : (
           !eliminated && (
