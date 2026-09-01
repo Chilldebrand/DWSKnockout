@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabaseClient.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import { formatLocalKickoff } from '../kickoffTime.js'
 
 const SEASON = 2026
 
@@ -124,7 +125,11 @@ export default function Dashboard() {
           <StatCard
             title={`Week ${week ?? '—'}`}
             value={myPick ? 'Pick locked in' : 'Pick needed!'}
-            accent={myPick ? 'text-turf-400' : 'text-accent-400 animate-pulse'}
+            accent={
+              myPick
+                ? 'text-green-300 drop-shadow-[0_0_8px_rgba(74,222,128,0.9)]'
+                : 'text-red-400 animate-pulse drop-shadow-[0_0_8px_rgba(248,113,113,0.85)]'
+            }
             to="/pick"
             hint="Click to go to picks →"
           />
@@ -136,6 +141,7 @@ export default function Dashboard() {
                 : 'TBD'
             }
             accent="text-white"
+            detail={firstKickoff ? formatLocalKickoff(firstKickoff) : undefined}
           />
           <StatCard
             title="Players still alive"
@@ -226,12 +232,13 @@ function RulesCard() {
   )
 }
 
-function StatCard({ title, value, accent, to, hint }) {
+function StatCard({ title, value, accent, to, hint, detail }) {
   const body = (
     <>
       <p className="text-xs uppercase tracking-wider text-gray-400">{title}</p>
       <p className={`mt-1 text-lg font-bold ${accent}`}>{value}</p>
-      {hint && <p className="mt-1 text-[11px] text-gray-500">{hint}</p>}
+      {hint && <p className="mt-1 text-[11px] text-white">{hint}</p>}
+      {detail && <p className="mt-1 text-xs text-gray-300">{detail}</p>}
     </>
   )
   return to ? (
