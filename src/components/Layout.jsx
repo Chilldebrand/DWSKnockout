@@ -1,14 +1,8 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext.jsx'
+import { getTopNavigation, logOutToHome } from '../navigation.js'
 import Logo from './Logo.jsx'
-
-const links = [
-  { to: '/', label: 'Dashboard' },
-  { to: '/pick', label: 'Make a Pick' },
-  { to: '/standings', label: 'Standings' },
-  { to: '/schedule', label: 'Schedule' },
-]
 
 export default function Layout() {
   const { session, profile, signOut } = useAuth()
@@ -29,21 +23,27 @@ export default function Layout() {
           </NavLink>
 
           <nav className="hidden sm:flex items-center gap-1 text-sm font-semibold">
-            {links.map((l) => (
+            {getTopNavigation(Boolean(session)).map((l) => (
               <NavLink
-                key={l.to}
+                key={l.label}
                 to={l.to}
                 end={l.to === '/'}
+                title={l.loginHint}
                 className={({ isActive }) =>
                   `relative rounded-lg px-3 py-1.5 transition-colors ${
-                    isActive ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    l.locked
+                      ? 'cursor-pointer text-gray-600 hover:bg-white/5 hover:text-gray-300'
+                      : isActive
+                        ? 'text-white'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
                     {l.label}
-                    {isActive && (
+                    {l.locked && <span className="ml-1 text-xs" aria-hidden="true">🔒</span>}
+                    {!l.locked && isActive && (
                       <motion.span
                         layoutId="nav-underline"
                         className="absolute inset-x-2 -bottom-[5px] h-0.5 rounded-full bg-gradient-to-r from-turf-500 to-brand-blue"
@@ -83,8 +83,7 @@ export default function Layout() {
                 </motion.span>
                 <button
                   onClick={async () => {
-                    await signOut()
-                    navigate('/login')
+                    await logOutToHome(signOut, navigate)
                   }}
                   className="rounded-lg border border-white/15 px-3 py-1.5 text-gray-300 transition-colors hover:border-white/30 hover:text-white"
                 >
