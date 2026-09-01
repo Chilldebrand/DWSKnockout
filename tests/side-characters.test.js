@@ -3,16 +3,16 @@ import test from 'node:test'
 
 import { shouldShowSideCharacters } from '../src/sideCharacters.js'
 
-test('shows side characters only for signed-in members away from Home', () => {
-  assert.equal(shouldShowSideCharacters(true, '/pick'), true)
-  assert.equal(shouldShowSideCharacters(true, '/standings'), true)
-  assert.equal(shouldShowSideCharacters(true, '/schedule'), true)
-  assert.equal(shouldShowSideCharacters(true, '/admin'), true)
+test('shows side characters only on the signed-in Home screen', () => {
+  assert.equal(shouldShowSideCharacters(true, '/'), true)
 })
 
-test('keeps side characters off the public and signed-in Home screens', () => {
+test('keeps side characters off public Home and every other page', () => {
   assert.equal(shouldShowSideCharacters(false, '/pick'), false)
   assert.equal(shouldShowSideCharacters(false, '/'), false)
-  assert.equal(shouldShowSideCharacters(true, '/'), false)
+  assert.equal(shouldShowSideCharacters(true, '/pick'), false)
+  assert.equal(shouldShowSideCharacters(true, '/standings'), false)
+  assert.equal(shouldShowSideCharacters(true, '/schedule'), false)
+  assert.equal(shouldShowSideCharacters(true, '/admin'), false)
   assert.equal(shouldShowSideCharacters(false, '/login'), false)
 })
