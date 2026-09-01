@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabaseClient.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import { getCountdownGame } from '../countdownGame.js'
 import { formatLocalKickoff } from '../kickoffTime.js'
 
 const SEASON = 2026
@@ -68,8 +69,9 @@ export default function Dashboard() {
     load()
   }, [session?.user?.id])
 
-  const firstKickoff = games[0] ? new Date(games[0].kickoff).getTime() : null
-  const countdown = useCountdown(firstKickoff ?? Date.now())
+  const countdownGame = getCountdownGame(games, myPick)
+  const pickKickoff = countdownGame ? new Date(countdownGame.kickoff).getTime() : null
+  const countdown = useCountdown(pickKickoff ?? Date.now())
 
   if (!session)
     return (
@@ -136,12 +138,14 @@ export default function Dashboard() {
           <StatCard
             title="Kickoff countdown"
             value={
-              firstKickoff
-                ? `${countdown.days}d ${countdown.hours}h ${countdown.mins}m ${countdown.secs}s`
-                : 'TBD'
+              !myPick
+                ? '← Make a pick'
+                : pickKickoff
+                  ? `${countdown.days}d ${countdown.hours}h ${countdown.mins}m ${countdown.secs}s`
+                  : 'Kickoff TBD'
             }
             accent="text-white"
-            detail={firstKickoff ? formatLocalKickoff(firstKickoff) : undefined}
+            detail={pickKickoff ? formatLocalKickoff(pickKickoff) : undefined}
           />
           <StatCard
             title="Players still alive"
