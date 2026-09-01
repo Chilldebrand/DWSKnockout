@@ -1,16 +1,33 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext.jsx'
 import { getTopNavigation, logOutToHome } from '../navigation.js'
+import { shouldShowSideCharacters } from '../sideCharacters.js'
 import Logo from './Logo.jsx'
 
 export default function Layout() {
   const { session, profile, signOut } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const showSideCharacters = shouldShowSideCharacters(Boolean(session), location.pathname)
 
   return (
     <div className="min-h-screen flex flex-col">
       <div className="app-backdrop" />
+      {showSideCharacters && (
+        <div className="pointer-events-none fixed inset-x-0 top-24 z-0 hidden 2xl:block" aria-hidden="true">
+          <img
+            src={`${import.meta.env.BASE_URL}glen-giants-ball-spin.png`}
+            alt=""
+            className="absolute left-5 h-[min(62vh,640px)] w-auto object-contain object-left drop-shadow-2xl"
+          />
+          <img
+            src={`${import.meta.env.BASE_URL}sloane-ravens-throw.png`}
+            alt=""
+            className="absolute right-5 h-[min(62vh,640px)] w-auto object-contain object-right drop-shadow-2xl"
+          />
+        </div>
+      )}
 
       <header className="sticky top-0 z-20 border-b border-white/10 bg-field-950/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
@@ -106,12 +123,12 @@ export default function Layout() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="mx-auto w-full max-w-6xl flex-1 px-4 py-8"
+        className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 py-8"
       >
         <Outlet />
       </motion.main>
 
-      <footer className="border-t border-white/10 py-4 text-center text-xs text-gray-500">
+      <footer className="relative z-10 border-t border-white/10 py-4 text-center text-xs text-gray-500">
         <span className="inline-flex items-center gap-1.5">
           <Logo size={14} /> DWS Survivor Pool · Dale Workforce Solutions · One loss and you're eliminated.
         </span>
