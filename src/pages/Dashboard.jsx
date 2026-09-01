@@ -73,25 +73,29 @@ export default function Dashboard() {
   if (!session)
     return (
       <div className="space-y-6">
-        <motion.div
+        <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-10 text-center"
+          className="relative overflow-hidden rounded-2xl border border-white/10 bg-field-950 shadow-2xl"
         >
-          <div className="text-6xl">🏈</div>
-          <h1 className="font-display mt-4 text-4xl font-extrabold uppercase">
-            DWS <span className="text-gradient">Knockout</span>
-          </h1>
-          <p className="mx-auto mt-2 max-w-md text-gray-400">
-            Pick one NFL team to win each week. Win and you survive. Lose and you're
-            knocked out. Last one standing takes the crown.
-          </p>
-          <Link to="/login">
-            <button className="mt-6 rounded-xl bg-gradient-to-r from-turf-500 to-turf-400 px-8 py-3 font-bold text-field-950 shadow-lg glow-green transition-transform hover:scale-105 active:scale-95">
-              Join the League
-            </button>
-          </Link>
-        </motion.div>
+          <img
+            src={`${import.meta.env.BASE_URL}hero-lineup-dws-survivor-pool.png`}
+            alt="DWS Survivor Pool players in Giants, Eagles, and Ravens jerseys"
+            className="min-h-[420px] w-full object-cover object-center"
+          />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-field-950 via-field-950/25 to-transparent px-6 pb-7 pt-24 sm:px-10 sm:pb-10">
+            <h1 className="sr-only">DWS Survivor Pool</h1>
+            <p className="max-w-sm text-sm text-gray-200 sm:text-base">
+              Pick one NFL team each week. Win and you survive. Lose and you're eliminated.
+              Last one standing takes the crown.
+            </p>
+            <Link to="/login" className="mt-5 inline-block">
+              <span className="rounded-xl bg-gradient-to-r from-turf-500 to-turf-400 px-7 py-3 font-bold text-field-950 shadow-lg glow-green transition-transform hover:scale-105 active:scale-95">
+                Join the Survivor Pool
+              </span>
+            </Link>
+          </div>
+        </motion.section>
         <RulesCard />
       </div>
     )
@@ -111,7 +115,7 @@ export default function Dashboard() {
           className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6"
         >
           <h2 className="text-xl font-bold text-red-400">
-            💀 Knocked out in week {profile.eliminated_week}
+            💀 Eliminated in week {profile.eliminated_week}
           </h2>
           <p className="mt-1 text-sm text-red-300/80">Better luck next season.</p>
         </motion.div>

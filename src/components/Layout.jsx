@@ -24,7 +24,7 @@ export default function Layout() {
             <Logo />
             <span className="font-display text-2xl font-extrabold uppercase tracking-wide leading-none">
               <span className="text-turf-500">DWS</span>{' '}
-              <span className="text-white">Knockout</span>
+              <span className="text-white">Survivor Pool</span>
             </span>
           </NavLink>
 
@@ -114,7 +114,7 @@ export default function Layout() {
 
       <footer className="border-t border-white/10 py-4 text-center text-xs text-gray-500">
         <span className="inline-flex items-center gap-1.5">
-          <Logo size={14} /> DWS Knockout · Dale Workforce Solutions · One loss and you're out.
+          <Logo size={14} /> DWS Survivor Pool · Dale Workforce Solutions · One loss and you're eliminated.
         </span>
       </footer>
     </div>

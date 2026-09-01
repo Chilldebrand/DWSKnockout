@@ -1,12 +1,12 @@
-# DWS Knockout
+# DWS Survivor Pool
 
 ## Play now
 
-**[Open DWS Knockout](https://chilldebrand.github.io/DWSKnockout/)**
+**[Open DWS Survivor Pool](https://chilldebrand.github.io/DWSKnockout/)**
 
 Share this link: <https://chilldebrand.github.io/DWSKnockout/>
 
-DWS Knockout is an NFL survivor league for Dale Workforce Solutions. Pick one team to win each week—but you can only use each team once all season. A loss knocks you out; the last player standing wins.
+DWS Survivor Pool is an NFL survivor league for Dale Workforce Solutions. Pick one team to win each week—but you can only use each team once all season. A loss eliminates you; the last player standing wins.
 
 ## How it works
 
